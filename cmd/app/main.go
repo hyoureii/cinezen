@@ -118,9 +118,7 @@ func (db movieDB) cariMovie() {
 	}
 
 	for _, movie := range db {
-		if (choice == '1' && movie.Title == cari) ||
-			(choice == '2' && movie.Genre == cari) ||
-			(choice == '3' && movie.Schedule == cari) {
+		if (choice == '1' && movie.Title == cari) || (choice == '2' && movie.Genre == cari) || (choice == '3' && movie.Schedule == cari) {
 			fmt.Println("\n----------------[ Daftar Film ]----------------")
 			fmt.Printf("\n%-20s   %-10s   %-4s   %-4s   %s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal")
 			fmt.Printf("%-20s | %-10s | %-4d | %-4.1f | %-d\n", movie.Title, movie.Genre, movie.Duration, movie.Rating, movie.Schedule)
