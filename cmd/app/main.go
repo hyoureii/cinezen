@@ -113,8 +113,7 @@ func (db movieDB) cariMovie() {
 	case '0':
 		db.viewAdmin()
 	default:
-		fmt.Println("Input tidak valid")
-		db.cariMovie()
+		fmt.Println("\nInput tidak valid")
 	}
 
 	i := 0
@@ -130,7 +129,6 @@ func (db movieDB) cariMovie() {
 
 	if found == false {
 		fmt.Println("\nFilm tidak ditemukan")
-		db.cariMovie()
 	}
 }
 
