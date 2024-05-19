@@ -129,6 +129,7 @@ func (db movieDB) cariMovie() {
 
 	if !found {
 		fmt.Println("Film tidak ditemukan")
+		db.cariMovie()
 	}
 }
 
