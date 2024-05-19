@@ -6,42 +6,41 @@ import (
 
 const MAX_MOV int = 100
 
+var db_Len int
+
 type movie struct {
 	Title, Genre       string
 	Duration, Schedule int
 	Rating             float32
 }
 
-type movieDB struct {
-	List [MAX_MOV]movie
-	Len  int
-}
+type movieDB [MAX_MOV]movie
 
-func (db movieDB) viewAdmin(quit *bool) {
+func (db movieDB) viewAdmin() {
 	var input byte
-	fmt.Println("\n------------------[ CINEZEN ]------------------")
-	fmt.Println("\n1. Cari film\n2. Tambah film baru\n3. Edit data film\n4. Tampilkan daftar film\n\n0 untuk keluar")
-	fmt.Scanf("%c", &input)
-	switch input {
-	case '0':
-		*quit = true
-	case '1':
-	case '2':
-		db.addMovie()
-	case '3':
-	case '4':
-		db.listMovie()
-	default:
-		fmt.Println("Input tidak valdi")
+	quitApp := 0
+	for quitApp == 0 {
+		fmt.Println("\n------------------[ CINEZEN ]------------------")
+		fmt.Println("\n1. Cari film\n2. Tambah film baru\n3. Edit data film\n4. Tampilkan daftar film\n\n0 untuk keluar")
+		fmt.Scanf("%c\n", &input)
+		switch input {
+		case '0':
+			quitApp = 1
+		case '2':
+			db.addMovie()
+		case '4':
+			db.listMovie()
+		default:
+			fmt.Println("Input tidak valdi")
+		}
 	}
 }
 
 func (db movieDB) listMovie() {
 	fmt.Println("\n----------------[ Daftar Film ]----------------")
 	fmt.Printf("\n     %-20s   %-10s   %-4s   %-4s   %s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal")
-	fmt.Println(db.Len)
-	for i := 0; i < db.Len; i++ {
-		fmt.Printf("%3d. %-20s | %-10s | %-4d | %-4.1f | %-d\n", i+1, db.List[i].Title, db.List[i].Genre, db.List[i].Duration, db.List[i].Rating, db.List[i].Schedule)
+	for i := 0; i < db_Len; i++ {
+		fmt.Printf("%3d. %-20s | %-10s | %-4d | %-4.1f | %-d\n", i+1, db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule)
 	}
 }
 
@@ -76,19 +75,16 @@ func (db *movieDB) addMovie() {
 		}
 	}
 
-	db.List[db.Len].Title = title
-	db.List[db.Len].Genre = genre
-	db.List[db.Len].Duration = duration
-	db.List[db.Len].Rating = rating
-	db.List[db.Len].Schedule = schedule
-	db.Len++
+	db[db_Len].Title = title
+	db[db_Len].Genre = genre
+	db[db_Len].Duration = duration
+	db[db_Len].Rating = rating
+	db[db_Len].Schedule = schedule
+	db_Len++
 }
 
 func main() {
 	var db movieDB
-	db.Len = 0
-	quitApp := false
-	for !quitApp {
-		db.viewAdmin(&quitApp)
-	}
+	db_Len = 0
+	db.viewAdmin()
 }
