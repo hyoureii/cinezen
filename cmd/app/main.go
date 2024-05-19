@@ -17,17 +17,10 @@ type movieDB struct {
 	Len  int
 }
 
-func viewUser() {
-	fmt.Println("\n------------------[ CINEZEN ]------------------")
-	fmt.Print("\nCari nama film : ")
-	// fmt.Println("-----------------------------------------")
-	// printEnter()
-}
-
 func (db movieDB) viewAdmin(quit *bool) {
 	var input uint8
-	fmt.Println("\n--------------[ CINEZEN - ADMIN ]--------------")
-	fmt.Println("\n1. Tambah film baru\n2. Edit data film\n3. List film\n\n0 untuk keluar")
+	fmt.Println("\n------------------[ CINEZEN ]------------------")
+	fmt.Println("\n1. Cari film\n2. Tambah film baru\n3. Edit data film\n4. Tampilkan daftar film\n\n0 untuk keluar")
 	fmt.Scan(&input)
 	if input == 0 {
 		*quit = true
