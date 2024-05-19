@@ -26,6 +26,8 @@ func (db movieDB) viewAdmin() {
 		switch input {
 		case '0':
 			quitApp = 1
+		case '1':
+			db.cariMovie()
 		case '2':
 			db.addMovie()
 		case '4':
@@ -81,6 +83,57 @@ func (db *movieDB) addMovie() {
 	db[db_Len].Rating = rating
 	db[db_Len].Schedule = schedule
 	db_Len++
+}
+
+func (db movieDB) cariMovie() {
+	var choice byte
+	i := 0
+	found := false
+
+	fmt.Println("\n------------------[ CINEZEN ]------------------")
+	fmt.Println("\n1. Cari dengan Judul\n2. Cari dengan Genre\n3. Cari dengan Tanggal\n\n0 Kembali")
+	fmt.Scanf("%c\n", &choice)
+	if choice == '1' {
+		var cari string
+		fmt.Scan(&cari)
+		for i < db_Len && found != true {
+			if cari == db[i].Title {
+				fmt.Println("\n----------------[ Daftar Film ]----------------")
+				fmt.Printf("\n%-20s   %-10s   %-4s   %-4s   %s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal")
+				fmt.Printf("%-20s | %-10s | %-4d | %-4.1f | %-d\n", db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule)
+				found = true
+			}
+			i++
+		}
+	} else if choice == '2' {
+		var cari string
+		fmt.Scan(&cari)
+		for i < db_Len && found != true {
+			if cari == db[i].Genre {
+				fmt.Println("\n----------------[ Daftar Film ]----------------")
+				fmt.Printf("\n%-20s   %-10s   %-4s   %-4s   %s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal")
+				fmt.Printf("%-20s | %-10s | %-4d | %-4.1f | %-d\n", db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule)
+				found = true
+			}
+			i++
+		}
+	} else if choice == '3' {
+		var cari int
+		fmt.Scan(&cari)
+		for i < db_Len && found != true {
+			if cari == db[i].Schedule {
+				fmt.Println("\n----------------[ Daftar Film ]----------------")
+				fmt.Printf("\n%-20s   %-10s   %-4s   %-4s   %s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal")
+				fmt.Printf("%-20s | %-10s | %-4d | %-4.1f | %-d\n", db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule)
+				found = true
+			}
+			i++
+		}
+	} else if choice == '0' {
+		db.viewAdmin()
+	} else {
+		fmt.Println("Input tidak valid")
+	}
 }
 
 func main() {
