@@ -117,18 +117,19 @@ func (db movieDB) cariMovie() {
 		db.cariMovie()
 	}
 
-	for _, movie := range db {
-		if (choice == '1' && movie.Title == cari) || (choice == '2' && movie.Genre == cari) || (choice == '3' && movie.Schedule == cari) {
+	i := 0
+	for i < db_Len && found != true {
+		if (choice == '1' && db[i].Title == cari) || (choice == '2' && db[i].Genre == cari) || (choice == '3' && db[i].Schedule == cari) {
 			fmt.Println("\n----------------[ Daftar Film ]----------------")
 			fmt.Printf("\n%-20s   %-10s   %-4s   %-4s   %s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal")
-			fmt.Printf("%-20s | %-10s | %-4d | %-4.1f | %-d\n", movie.Title, movie.Genre, movie.Duration, movie.Rating, movie.Schedule)
+			fmt.Printf("%-20s | %-10s | %-4d | %-4.1f | %-d\n", db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule)
 			found = true
-			break
 		}
+		i++
 	}
 
-	if !found {
-		fmt.Println("Film tidak ditemukan")
+	if found == false {
+		fmt.Println("\nFilm tidak ditemukan")
 		db.cariMovie()
 	}
 }
