@@ -18,18 +18,21 @@ type movieDB struct {
 }
 
 func (db movieDB) viewAdmin(quit *bool) {
-	var input uint8
+	var input byte
 	fmt.Println("\n------------------[ CINEZEN ]------------------")
 	fmt.Println("\n1. Cari film\n2. Tambah film baru\n3. Edit data film\n4. Tampilkan daftar film\n\n0 untuk keluar")
-	fmt.Scan(&input)
-	if input == 0 {
+	fmt.Scanf("%c", &input)
+	switch input {
+	case '0':
 		*quit = true
-	} else if input > 3 || input < 0 {
-		fmt.Println("Input tidak valid")
-	} else if input == 1 {
+	case '1':
+	case '2':
 		db.addMovie()
-	} else if input == 3 {
+	case '3':
+	case '4':
 		db.listMovie()
+	default:
+		fmt.Println("Input tidak valdi")
 	}
 }
 
