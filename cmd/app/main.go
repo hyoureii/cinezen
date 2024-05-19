@@ -87,52 +87,50 @@ func (db *movieDB) addMovie() {
 
 func (db movieDB) cariMovie() {
 	var choice byte
-	i := 0
+	var cari interface{}
 	found := false
 
 	fmt.Println("\n------------------[ CINEZEN ]------------------")
 	fmt.Println("\n1. Cari dengan Judul\n2. Cari dengan Genre\n3. Cari dengan Tanggal\n\n0 Kembali")
 	fmt.Scanf("%c\n", &choice)
-	if choice == '1' {
-		var cari string
-		fmt.Scan(&cari)
-		for i < db_Len && found != true {
-			if cari == db[i].Title {
-				fmt.Println("\n----------------[ Daftar Film ]----------------")
-				fmt.Printf("\n%-20s   %-10s   %-4s   %-4s   %s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal")
-				fmt.Printf("%-20s | %-10s | %-4d | %-4.1f | %-d\n", db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule)
-				found = true
-			}
-			i++
-		}
-	} else if choice == '2' {
-		var cari string
-		fmt.Scan(&cari)
-		for i < db_Len && found != true {
-			if cari == db[i].Genre {
-				fmt.Println("\n----------------[ Daftar Film ]----------------")
-				fmt.Printf("\n%-20s   %-10s   %-4s   %-4s   %s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal")
-				fmt.Printf("%-20s | %-10s | %-4d | %-4.1f | %-d\n", db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule)
-				found = true
-			}
-			i++
-		}
-	} else if choice == '3' {
-		var cari int
-		fmt.Scan(&cari)
-		for i < db_Len && found != true {
-			if cari == db[i].Schedule {
-				fmt.Println("\n----------------[ Daftar Film ]----------------")
-				fmt.Printf("\n%-20s   %-10s   %-4s   %-4s   %s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal")
-				fmt.Printf("%-20s | %-10s | %-4d | %-4.1f | %-d\n", db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule)
-				found = true
-			}
-			i++
-		}
-	} else if choice == '0' {
+
+	switch choice {
+	case '1':
+		fmt.Print("Masukkan Judul: ")
+		var input string
+		fmt.Scan(&input)
+		cari = input
+	case '2':
+		fmt.Print("Masukkan Genre: ")
+		var input string
+		fmt.Scan(&input)
+		cari = input
+	case '3':
+		fmt.Print("Masukkan Jam: ")
+		var input int
+		fmt.Scan(&input)
+		cari = input
+	case '0':
 		db.viewAdmin()
-	} else {
+	default:
 		fmt.Println("Input tidak valid")
+		db.cariMovie()
+	}
+
+	for _, movie := range db {
+		if (choice == '1' && movie.Title == cari) ||
+			(choice == '2' && movie.Genre == cari) ||
+			(choice == '3' && movie.Schedule == cari) {
+			fmt.Println("\n----------------[ Daftar Film ]----------------")
+			fmt.Printf("\n%-20s   %-10s   %-4s   %-4s   %s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal")
+			fmt.Printf("%-20s | %-10s | %-4d | %-4.1f | %-d\n", movie.Title, movie.Genre, movie.Duration, movie.Rating, movie.Schedule)
+			found = true
+			break
+		}
+	}
+
+	if !found {
+		fmt.Println("Film tidak ditemukan")
 	}
 }
 
