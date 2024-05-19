@@ -80,13 +80,6 @@ func (db *movieDB) addMovie() {
 		}
 	}
 
-	//for debugging
-	fmt.Println("Judul : ", title)
-	fmt.Println("Genre : ", genre)
-	fmt.Println("Durasi : ", duration)
-	fmt.Println("Rating : ", rating)
-	fmt.Println("Jadwal : ", schedule)
-
 	db.List[db.Len].Title = title
 	db.List[db.Len].Genre = genre
 	db.List[db.Len].Duration = duration
