@@ -30,6 +30,8 @@ func (db movieDB) viewAdmin() {
 			db.cariMovie()
 		case '2':
 			db.addMovie()
+		case '3':
+			db.choiceEditMovie()
 		case '4':
 			db.listMovie()
 		default:
@@ -88,7 +90,7 @@ func (db *movieDB) addMovie() {
 	db_Len++
 }
 
-func (db movieDB) cariMovie() {
+func (db *movieDB) cariMovie() {
 	var choice string
 	var cari interface{}
 	found := false
@@ -128,12 +130,84 @@ func (db movieDB) cariMovie() {
 				fmt.Printf("\n%-40s   %-14s   %-4s      %-6s   %s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal")
 				fmt.Printf("%-40s | %-14s | %-4d menit | %-6.1f | %-d\n", db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule)
 				found = true
+				var editChoice string
+				fmt.Println("\nApakah Anda ingin mengedit film ini? (y/n)")
+				fmt.Scan(&editChoice)
+				if editChoice == "y" || editChoice == "Y" {
+					db.editMovie(i)
+				}
 			}
 			i++
 		}
 
 		if !found {
 			fmt.Println("\nFilm tidak ditemukan")
+		}
+	}
+}
+
+func (db *movieDB) choiceEditMovie() {
+	var i, dbLen int
+	choice := true
+	dbLen = (db_Len + 1)
+	for choice == true {
+		db.listMovie()
+		fmt.Println("\nPilih data yang ingin diubah:")
+		fmt.Scan(&i)
+		if i > 0 && i < dbLen {
+			db.editMovie(i - 1)
+		} else {
+			fmt.Println("Pilihan tidak valid.")
+			choice = false
+		}
+	}
+}
+
+func (db *movieDB) editMovie(i int) {
+	var choice int
+	back := true
+
+	for back == true {
+		fmt.Println("\nPilih data yang ingin diubah:")
+		fmt.Println("1. Judul")
+		fmt.Println("2. Genre")
+		fmt.Println("3. Durasi")
+		fmt.Println("4. Rating")
+		fmt.Println("5. Jadwal")
+		fmt.Println("0. Kembali")
+		fmt.Print("Pilihan: ")
+		fmt.Scan(&choice)
+
+		switch choice {
+		case 1:
+			fmt.Print("Masukkan judul baru: ")
+			var newTitle string
+			fmt.Scan(&newTitle)
+			db[i].Title = newTitle
+		case 2:
+			fmt.Print("Masukkan genre baru: ")
+			var newGenre string
+			fmt.Scan(&newGenre)
+			db[i].Genre = newGenre
+		case 3:
+			fmt.Print("Masukkan durasi baru (dalam menit): ")
+			var newDuration int
+			fmt.Scan(&newDuration)
+			db[i].Duration = newDuration
+		case 4:
+			fmt.Print("Masukkan rating baru: ")
+			var newRating float32
+			fmt.Scan(&newRating)
+			db[i].Rating = newRating
+		case 5:
+			fmt.Print("Masukkan jadwal baru (misalnya 1400 untuk jam 14:00): ")
+			var newSchedule int
+			fmt.Scan(&newSchedule)
+			db[i].Schedule = newSchedule
+		case 0:
+			back = false
+		default:
+			fmt.Println("Pilihan tidak valid.")
 		}
 	}
 }
