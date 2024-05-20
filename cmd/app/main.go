@@ -147,13 +147,15 @@ func (db *movieDB) cariMovie() {
 }
 
 func (db *movieDB) choiceEditMovie() {
-	var i, dbLen int
+	var dbLen int
+	var j string
 	choice := true
 	dbLen = (db_Len + 1)
 	for choice == true {
 		db.listMovie()
 		fmt.Println("\nPilih nomor data yang ingin diubah: (0 untuk kembali)")
-		fmt.Scan(&i)
+		fmt.Scan(&j)
+		i := int(j[0]) - 48
 		if i > 0 && i < dbLen {
 			db.editMovie(i - 1)
 		} else if i == 0 {
