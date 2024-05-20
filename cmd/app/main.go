@@ -17,13 +17,13 @@ type movie struct {
 type movieDB [MAX_MOV]movie
 
 func (db movieDB) viewAdmin() {
-	var input byte
+	var input string
 	quitApp := 0
 	for quitApp == 0 {
 		fmt.Println("\n------------------[ CINEZEN ]------------------")
 		fmt.Println("\n1. Cari film\n2. Tambah film baru\n3. Edit data film\n4. Tampilkan daftar film\n\n0 untuk keluar")
-		fmt.Scanf("%c\n", &input)
-		switch input {
+		fmt.Scan(&input)
+		switch input[0] {
 		case '0':
 			quitApp = 1
 		case '1':
@@ -40,9 +40,9 @@ func (db movieDB) viewAdmin() {
 
 func (db movieDB) listMovie() {
 	fmt.Println("\n----------------[ Daftar Film ]----------------")
-	fmt.Printf("\n     %-20s   %-10s   %-4s   %-4s   %s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal")
+	fmt.Printf("\n     %-40s   %-14s   %-4s      %-6s   %-s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal")
 	for i := 0; i < db_Len; i++ {
-		fmt.Printf("%3d. %-20s | %-10s | %-4d | %-4.1f | %-d\n", i+1, db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule)
+		fmt.Printf("%3d. %-40s | %-14s | %-4d menit | %-6.1f | %-d\n", i+1, db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule)
 	}
 }
 
@@ -54,6 +54,9 @@ func (db *movieDB) addMovie() {
 
 	fmt.Print("\nNama film : ")
 	fmt.Scan(&title)
+	if len(title) > 40 {
+		title = title[0:40]
+	}
 	fmt.Print("\nGenre film : ")
 	fmt.Scan(&genre)
 	fmt.Print("\nDurasi film (dalam menit) : ")
@@ -86,15 +89,16 @@ func (db *movieDB) addMovie() {
 }
 
 func (db movieDB) cariMovie() {
-	var choice byte
+	var choice string
 	var cari interface{}
 	found := false
+	proceedFind := true
 
 	fmt.Println("\n------------------[ CINEZEN ]------------------")
 	fmt.Println("\n1. Cari dengan Judul\n2. Cari dengan Genre\n3. Cari dengan Tanggal\n\n0 Kembali")
-	fmt.Scanf("%c\n", &choice)
+	fmt.Scan(&choice)
 
-	switch choice {
+	switch choice[0] {
 	case '1':
 		fmt.Print("Masukkan Judul: ")
 		var input string
@@ -111,24 +115,26 @@ func (db movieDB) cariMovie() {
 		fmt.Scan(&input)
 		cari = input
 	case '0':
-		db.viewAdmin()
+		proceedFind = false
 	default:
 		fmt.Println("\nInput tidak valid")
 	}
 
-	i := 0
-	for i < db_Len && found != true {
-		if (choice == '1' && db[i].Title == cari) || (choice == '2' && db[i].Genre == cari) || (choice == '3' && db[i].Schedule == cari) {
-			fmt.Println("\n----------------[ Daftar Film ]----------------")
-			fmt.Printf("\n%-20s   %-10s   %-4s   %-4s   %s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal")
-			fmt.Printf("%-20s | %-10s | %-4d | %-4.1f | %-d\n", db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule)
-			found = true
+	if proceedFind {
+		i := 0
+		for i < db_Len && !found {
+			if (choice[0] == '1' && db[i].Title == cari) || (choice[0] == '2' && db[i].Genre == cari) || (choice[0] == '3' && db[i].Schedule == cari) {
+				fmt.Println("\n-----------------[ Data Film ]-----------------")
+				fmt.Printf("\n%-40s   %-14s   %-4s      %-6s   %s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal")
+				fmt.Printf("%-40s | %-14s | %-4d menit | %-6.1f | %-d\n", db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule)
+				found = true
+			}
+			i++
 		}
-		i++
-	}
 
-	if found == false {
-		fmt.Println("\nFilm tidak ditemukan")
+		if !found {
+			fmt.Println("\nFilm tidak ditemukan")
+		}
 	}
 }
 
