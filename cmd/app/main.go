@@ -152,10 +152,13 @@ func (db *movieDB) choiceEditMovie() {
 	dbLen = (db_Len + 1)
 	for choice == true {
 		db.listMovie()
-		fmt.Println("\nPilih data yang ingin diubah:")
+		fmt.Println("\nPilih nomor data yang ingin diubah: (0 untuk kembali)")
 		fmt.Scan(&i)
 		if i > 0 && i < dbLen {
 			db.editMovie(i - 1)
+		} else if i == 0 {
+			fmt.Println("Kembali")
+			choice = false
 		} else {
 			fmt.Println("Pilihan tidak valid.")
 			choice = false
