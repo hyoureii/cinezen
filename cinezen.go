@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/charmbracelet/bubbles/textinput"
 	tea "github.com/charmbracelet/bubbletea"
 )
 
 type Model struct {
 	Cursor int
+	Inputs []textinput.Model
 }
 
 func main() {
@@ -23,7 +25,7 @@ func main() {
 }
 
 func (m Model) Init() tea.Cmd {
-	return nil
+	return textinput.Blink
 }
 
 // main Update function
@@ -34,8 +36,8 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, tea.Quit
 		}
 	}
-	if app.AppState == "notLogged" {
-		return updateStart(msg, m)
+	if app.WhatToShow == "choices" {
+		return updateChoices(msg, m)
 	}
 
 	return m, nil
@@ -45,16 +47,23 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 func (m Model) View() string {
 	var s string
 
-	if app.AppState == "notLogged" {
+	switch app.AppState {
+	case "notLogged":
 		s = app.Choose.ViewStart(m.Cursor)
+	case "mainAdmin":
+		s = app.Choose.ViewAdmin(m.Cursor)
 	}
 
-	return s
+	return s + fmt.Sprintf("\ncursor=%d\nAppState=%s", m.Cursor, app.AppState)
+}
+
+func (m *Model) ResetCursor() {
+	m.Cursor = 0
 }
 
 // Sub-update functions
 
-func updateStart(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
+func updateChoices(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -68,6 +77,7 @@ func updateStart(msg tea.Msg, m Model) (tea.Model, tea.Cmd) {
 			}
 		case "enter":
 			app.UpdateApp(m.Cursor)
+			m.ResetCursor()
 		}
 	}
 
