@@ -56,11 +56,11 @@ func genRanDiscount(price int, discount *Discount) {
 	}
 	rand.Seed(seed)
 	if price >= 40000 && price <= 100000 {
-		discount.Percentage = rand.Float64() * 0.25
+		discount.Percentage = rand.Float64() * 0.05
 	} else if price > 32000 && price < 40000 {
-		discount.Percentage = rand.Float64() * 0.02
+		discount.Percentage = rand.Float64() * 0.01
 	} else if price > 100000 {
-		discount.Percentage = rand.Float64() * 0.40
+		discount.Percentage = rand.Float64() * 0.10
 	} else {
 		discount.Percentage = 0
 	}
@@ -124,7 +124,7 @@ func (db movieDB) listMovie() {
 	fmt.Println("\n----------------[ Daftar Film ]----------------")
 	fmt.Printf("\n     %-40s   %-14s   %-4s      %-6s   %-4s    %-s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal", "Harga")
 	for i := 0; i < db_Len; i++ {
-		if db[i].Discount.Percentage*100 > 0.0000000000000 {
+		if db[i].Discount.Percentage*100 > 0 {
 			fmt.Printf("%3d. %-40s | %-14s | %-4d menit | %-6.1f | %-6.d | Rp.%-d	| Diskon %.1f%% (Total Harga: Rp.%d)\n", i+1, db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule, db[i].Price, db[i].Discount.Percentage*100, db[i].Discount.MinPrice)
 		} else {
 			fmt.Printf("%3d. %-40s | %-14s | %-4d menit | %-6.1f | %-6.d | Rp.%-d	| Tidak Dapat Diskon\n", i+1, db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule, db[i].Price)
