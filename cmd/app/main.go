@@ -374,14 +374,8 @@ func (db *movieDB) editMovie(i int) {
 
 	for back {
 		fmt.Println("\nPilih data yang ingin diubah:")
-		fmt.Println("1. Judul")
-		fmt.Println("2. Genre")
-		fmt.Println("3. Durasi")
-		fmt.Println("4. Rating")
-		fmt.Println("5. Jadwal")
-		fmt.Println("6. Harga")
-		fmt.Println("0. Kembali")
-		fmt.Print("Pilihan: ")
+		fmt.Printf("1. Judul\n2. Genre\n3. Durasi\n4. Rating\n5. Jadwal\n6. Harga\n\n0. Kembali")
+		fmt.Print("\nPilihan: ")
 		fmt.Scan(&choice)
 
 		switch choice {
