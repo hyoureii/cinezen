@@ -403,7 +403,7 @@ func SeatSelect(seat db.AvailSeat) {
 	t := table.New().
 		Width(width).
 		Border(lipgloss.HiddenBorder()).
-		Headers(" ", "1", "2", "3", "4", "5", "6", "7", "8", "9", "10")
+		Headers(" ", "1", "2", "3", "4", "5", "6", "7", "8", "9")
 	for i := range seat {
 		for j := range seat[i] {
 			if !seat[i][j] {
