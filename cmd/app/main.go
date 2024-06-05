@@ -16,11 +16,12 @@ const (
 var db_Len int
 
 type movie struct {
-	Title, Genre              string
-	Duration, Schedule, Price int
-	Rating                    float32
-	Discount                  Discount
-	Global                    Global
+	Title, Genre    string
+	Duration, Price int
+	Rating          float32
+	Discount        Discount
+	Global          Global
+	Schedule        MovieSchedule
 }
 
 type Discount struct {
@@ -29,16 +30,23 @@ type Discount struct {
 }
 
 type Purchase struct {
-	Title, Genre              string
-	Duration, Schedule, Price int
-	Rating                    float32
-	Discount                  Discount
+	Title, Genre    string
+	Duration, Price int
+	Rating          float32
+	Discount        Discount
+	Schedule        MovieSchedule
 }
 
 type Global struct {
 	Authority     bool
 	purchaseCount int
 	purchases     [maxPurchases]Purchase
+}
+
+type MovieSchedule struct {
+	Hour  int
+	Day   int
+	Month int
 }
 
 type movieDB [MAX_MOV]movie
@@ -122,12 +130,12 @@ func (db *movieDB) viewUser() {
 
 func (db movieDB) listMovie() {
 	fmt.Println("\n----------------[ Daftar Film ]----------------")
-	fmt.Printf("\n     %-40s   %-14s   %-4s      %-6s   %-4s    %-s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal", "Harga")
+	fmt.Printf("\n     %-40s   %-14s   %-4s      %-6s          %-12s          %4s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal", "Harga")
 	for i := 0; i < db_Len; i++ {
 		if db[i].Discount.Percentage*100 > 0 {
-			fmt.Printf("%3d. %-40s | %-14s | %-4d menit | %-6.1f | %-6.d | Rp.%-d	| Diskon %.1f%% (Total Harga: Rp.%d)\n", i+1, db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule, db[i].Price, db[i].Discount.Percentage*100, db[i].Discount.MinPrice)
+			fmt.Printf("%3d. %-40s | %-14s | %-4d menit | %-6.1f | Pukul: %-2d Tanggal: %-2d %-2d | Rp.%4d	| Diskon %.1f%% (Total Harga: Rp.%d)\n", i+1, db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule.Hour, db[i].Schedule.Day, db[i].Schedule.Month, db[i].Price, db[i].Discount.Percentage*100, db[i].Discount.MinPrice)
 		} else {
-			fmt.Printf("%3d. %-40s | %-14s | %-4d menit | %-6.1f | %-6.d | Rp.%-d	| Tidak Dapat Diskon\n", i+1, db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule, db[i].Price)
+			fmt.Printf("%3d. %-40s | %-14s | %-4d menit | %-6.1f | Pukul: %-2d Tanggal: %-2d %-2d | Rp.%4d	| Tidak Dapat Diskon\n", i+1, db[i].Title, db[i].Genre, db[i].Duration, db[i].Rating, db[i].Schedule.Hour, db[i].Schedule.Day, db[i].Schedule.Month, db[i].Price)
 		}
 	}
 	if !db[0].Global.Authority {
@@ -139,7 +147,9 @@ func (db *movieDB) addMovie() {
 	var (
 		title, chosenGenre string
 		duration           int     = -1
-		schedule           int     = -1
+		scheduleHour       int     = -1
+		scheduleDay        int     = -1
+		scheduleMonth      int     = -1
 		rating             float32 = -1
 		price              int     = -1
 		discount           Discount
@@ -211,12 +221,20 @@ func (db *movieDB) addMovie() {
 		}
 	}
 	fmt.Print("\n")
-	for schedule == -1 {
-		fmt.Print("Jadwal film tayang : ")
-		fmt.Scan(&schedule)
-		if schedule > 20 || schedule < 10 {
-			schedule = -1
-			fmt.Printf("\nHanya dapat ditayangkan pukul 10.00 sampai 20.00\n")
+	for scheduleHour == -1 || scheduleDay == -1 || scheduleMonth == -1 {
+		fmt.Print("Jadwal film tayang : (format: Hour Day Month)")
+		fmt.Scanf("%d %d %d", scheduleHour, scheduleDay, scheduleMonth)
+		if scheduleHour > 20 || scheduleHour < 10 {
+			scheduleHour = -1
+			fmt.Printf("\nHanya dapat ditayangkan pukul 10 sampai 20\n")
+		}
+		if scheduleDay > 0 || scheduleDay < 32 {
+			scheduleDay = -1
+			fmt.Printf("\nHanya dapat ditayangkan tanggal 1 sampai 31\n")
+		}
+		if scheduleMonth > 0 || scheduleMonth < 13 {
+			scheduleMonth = -1
+			fmt.Printf("\nHanya dapat ditayangkan bulan 1 sampai 12\n")
 		}
 	}
 	fmt.Print("\n")
@@ -235,7 +253,9 @@ func (db *movieDB) addMovie() {
 	db[db_Len].Genre = chosenGenre
 	db[db_Len].Duration = duration
 	db[db_Len].Rating = rating
-	db[db_Len].Schedule = schedule
+	db[db_Len].Schedule.Hour = scheduleHour
+	db[db_Len].Schedule.Day = scheduleDay
+	db[db_Len].Schedule.Month = scheduleMonth
 	db[db_Len].Price = price
 	db[db_Len].Discount = discount
 	db_Len++
@@ -457,16 +477,31 @@ func (db *movieDB) editMovie(i int) {
 			}
 			db[i].Rating = newRating
 		case 5:
-			var newSchedule int = -1
-			for newSchedule == -1 {
-				fmt.Print("Masukkan Jadwal film baru: ")
-				fmt.Scan(&newSchedule)
-				if newSchedule > 20 || newSchedule < 10 {
-					newSchedule = -1
-					fmt.Printf("\nHanya dapat ditayangkan pukul 10.00 sampai 20.00\n")
+			var (
+				newScheduleHour  int = -1
+				newScheduleDay   int = -1
+				newScheduleMonth int = -1
+			)
+			for newScheduleHour == -1 || newScheduleDay == -1 || newScheduleMonth == -1 {
+				fmt.Print("Jadwal film tayang : (format: Hour Day Month)")
+				fmt.Scanf("%d %d %d", newScheduleHour, newScheduleDay, newScheduleMonth)
+				if newScheduleHour > 20 || newScheduleHour < 10 {
+					newScheduleHour = -1
+					fmt.Printf("\nHanya dapat ditayangkan pukul 10 sampai 20\n")
+				}
+				if newScheduleDay > 0 || newScheduleDay < 32 {
+					newScheduleDay = -1
+					fmt.Printf("\nHanya dapat ditayangkan tanggal 1 sampai 31\n")
+				}
+				if newScheduleMonth > 0 || newScheduleMonth < 13 {
+					newScheduleMonth = -1
+					fmt.Printf("\nHanya dapat ditayangkan bulan 1 sampai 12\n")
 				}
 			}
-			db[i].Schedule = newSchedule
+			db[i].Schedule.Hour = newScheduleHour
+			db[i].Schedule.Day = newScheduleDay
+			db[i].Schedule.Month = newScheduleMonth
+
 		case 6:
 			var newPrice int = -1
 			for newPrice == -1 {
@@ -488,13 +523,13 @@ func (db *movieDB) editMovie(i int) {
 
 func (db *movieDB) purcList() {
 	fmt.Println("\n----------------[ Tiket Yang Dimiliki ]----------------")
-	fmt.Printf("\n     %-40s   %-14s   %-4s      %-6s   %-4s    %-s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal", "Harga")
+	fmt.Printf("\n     %-40s   %-14s   %-4s      %-6s          %-12s          %4s\n", "Judul", "Genre", "Durasi", "Rating", "Jadwal", "Harga")
 	for i := 0; i < db[0].Global.purchaseCount; i++ {
 		p := db[0].Global.purchases[i]
 		if p.Discount.Percentage*100 > 0.0000000000000 {
-			fmt.Printf("%3d. %-40s | %-14s | %-4d menit | %-6.1f | %-6.d | Rp.%-d\t|\n", i+1, p.Title, p.Genre, p.Duration, p.Rating, p.Schedule, p.Discount.MinPrice)
+			fmt.Printf("%3d. %-40s | %-14s | %-4d menit | %-6.1f | Pukul: %-2d Tanggal: %-2d %-2d | Rp.%-d\t	|\n", i+1, p.Title, p.Genre, p.Duration, p.Rating, p.Schedule.Hour, p.Schedule.Day, p.Schedule.Month, p.Discount.MinPrice)
 		} else {
-			fmt.Printf("%3d. %-40s | %-14s | %-4d menit | %-6.1f | %-6.d | Rp.%-d\t|\n", i+1, p.Title, p.Genre, p.Duration, p.Rating, p.Schedule, p.Discount.MinPrice)
+			fmt.Printf("%3d. %-40s | %-14s | %-4d menit | %-6.1f | Pukul: %-2d Tanggal: %-2d %-2d | Rp.%-d\t	|\n", i+1, p.Title, p.Genre, p.Duration, p.Rating, p.Schedule.Hour, p.Schedule.Day, p.Schedule.Month, p.Discount.MinPrice)
 		}
 	}
 }
@@ -529,7 +564,7 @@ func (db *movieDB) beliTiket() {
 					Title:    db[i].Title,
 					Genre:    db[i].Genre,
 					Duration: db[i].Duration,
-					Schedule: db[i].Schedule,
+					Schedule: MovieSchedule{db[i].Schedule.Hour, db[i].Schedule.Day, db[i].Schedule.Month},
 					Price:    db[i].Price,
 					Rating:   db[i].Rating,
 					Discount: db[i].Discount,
@@ -561,7 +596,7 @@ func main() {
 		Title:    "Inception",
 		Genre:    "Fantasy",
 		Duration: 148,
-		Schedule: 14,
+		Schedule: MovieSchedule{14, 12, 10},
 		Rating:   8.8,
 		Price:    30000,
 	}
@@ -570,7 +605,7 @@ func main() {
 		Title:    "BadGuy",
 		Genre:    "Fantasy",
 		Duration: 200,
-		Schedule: 11,
+		Schedule: MovieSchedule{10, 28, 6},
 		Rating:   9.8,
 		Price:    45000,
 	}
@@ -580,7 +615,7 @@ func main() {
 		Title:    "Spy",
 		Genre:    "Action",
 		Duration: 128,
-		Schedule: 12,
+		Schedule: MovieSchedule{10, 7, 2},
 		Rating:   7.4,
 		Price:    35000,
 	}
@@ -589,7 +624,7 @@ func main() {
 		Title:    "Stressed",
 		Genre:    "Romance",
 		Duration: 174,
-		Schedule: 15,
+		Schedule: MovieSchedule{17, 2, 6},
 		Rating:   9.2,
 		Price:    50000,
 	}
@@ -598,7 +633,7 @@ func main() {
 		Title:    "Hunter",
 		Genre:    "Action",
 		Duration: 243,
-		Schedule: 17,
+		Schedule: MovieSchedule{19, 28, 5},
 		Rating:   8.5,
 		Price:    200000,
 	}
