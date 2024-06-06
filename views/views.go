@@ -172,9 +172,9 @@ func ViewUser(showList, showTickets bool, ticket db.Tickets, data db.MovieDB) {
 	}
 	fmt.Println(style.Render("2. Cari film\n3. Pesan tiket"))
 	if showTickets {
-		fmt.Println(style.Render("\n4. Sembunyikan Daftar Ticket"))
+		fmt.Println(style.Render("4. Sembunyikan Daftar Tiket"))
 	} else {
-		fmt.Println(style.Render("\n4. Tampilkan Daftar Film"))
+		fmt.Println(style.Render("4. Tampilkan Daftar Tiket"))
 	}
 	if showList {
 		fmt.Println(style.Render("\n7. Urutkan Berdasarkan Genre\n8. Urutkan Berdasarkan Jadwal Tayang\n9. Urutkan Berdasarkan Harga"))
