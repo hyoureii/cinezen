@@ -23,7 +23,7 @@ func main() {
 		switch app.DetectKey().String()[0] {
 		case '1':
 			logged = true
-			adminStart(&logged, showList, dbMovie)
+			adminStart(&logged, showList, &dbMovie)
 		case '2':
 			logged = true
 			userStart(&logged, showList, dbMovie, seat)
@@ -33,9 +33,9 @@ func main() {
 	}
 }
 
-func adminStart(logged *bool, showList bool, dbMovie db.MovieDB) {
+func adminStart(logged *bool, showList bool, dbMovie *db.MovieDB) {
 	for *logged {
-		views.ViewAdmin(showList, dbMovie)
+		views.ViewAdmin(showList, *dbMovie)
 		switch app.DetectKey().String()[0] {
 		case '1':
 			if showList {
@@ -44,19 +44,19 @@ func adminStart(logged *bool, showList bool, dbMovie db.MovieDB) {
 				showList = true
 			}
 		case '2':
-			search(dbMovie)
+			search(*dbMovie)
 		case '3':
-			edit(&dbMovie)
+			edit(dbMovie)
 		case '4':
-			add(&dbMovie)
+			add(dbMovie)
 		case '5':
 			delete(dbMovie)
 		case '7':
-			db.Sort(0, &dbMovie)
+			db.Sort(0, dbMovie)
 		case '8':
-			db.Sort(1, &dbMovie)
+			db.Sort(1, dbMovie)
 		case '9':
-			db.Sort(2, &dbMovie)
+			db.Sort(2, dbMovie)
 		case 'q':
 			*logged = false
 		}
@@ -170,9 +170,13 @@ func add(dbMovie *db.MovieDB) {
 		} else {
 			switch phase {
 			case 0:
-				fmt.Scanf("%s\n", &newMovie.Title)
-				newMovie.Title = strings.ReplaceAll(newMovie.Title, "_", " ")
-				phase++
+				var inp string
+				fmt.Scanf("%s\n", &inp)
+				inp = strings.ReplaceAll(inp, "_", " ")
+				if len(inp) > 0 {
+					newMovie.Title = inp
+					phase++
+				}
 			case 1:
 				valid := false
 				var inp int
@@ -189,7 +193,10 @@ func add(dbMovie *db.MovieDB) {
 				var inp int
 				for !valid {
 					fmt.Scan(&inp)
-					if inp >= 0 && inp < 10 {
+					if inp == 0 {
+						inp = 10
+					}
+					if inp > 0 && inp <= 10 {
 						newMovie.Genre = db.GetGenres()[inp-1]
 						valid = true
 						phase++
@@ -346,41 +353,45 @@ func edit(dbMovie *db.MovieDB) {
 				}
 			}
 		} else {
-			var inp string
+			var inp int
 			fmt.Scan(&inp)
-			if inp[0] == 'q' {
+			if inp == 0 {
 				done = true
-			}
-			if int(inp[0]-49) > -1 && int(inp[0]-49) < dbMovie.Len {
-				id = int(inp[0] - 49)
-				idChosen = true
+			} else {
+				inp--
+				if inp > -1 && inp < dbMovie.Len {
+					id = inp
+					idChosen = true
+				}
 			}
 		}
 	}
 }
 
-func delete(dbMovie db.MovieDB) {
+func delete(dbMovie *db.MovieDB) {
 	id := -1
 	hasChosen, done := false, false
 	for !done {
-		views.ViewDelete(dbMovie, id, hasChosen)
+		views.ViewDelete(*dbMovie, id, hasChosen)
 		if hasChosen {
 			key := app.DetectKey().Code
 			if key == keys.Esc {
 				id = -1
 			} else if key == keys.Enter {
-				db.Delete(&dbMovie, id)
+				db.Delete(dbMovie, id)
 			}
 			hasChosen = false
 		} else {
-			var inp string
+			var inp int
 			fmt.Scan(&inp)
-			if inp[0] == 'q' {
+			if inp == 0 {
 				done = true
-			}
-			if int(inp[0]-49) > -1 && int(inp[0]-49) < dbMovie.Len {
-				id = int(inp[0] - 49)
-				hasChosen = true
+			} else {
+				inp--
+				if inp > -1 && inp < dbMovie.Len {
+					id = inp
+					hasChosen = true
+				}
 			}
 		}
 	}

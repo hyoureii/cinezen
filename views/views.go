@@ -46,7 +46,7 @@ func ListMovie(data db.MovieDB, str string) {
 	style := getStyle()
 	header := style.Bold(true).Foreground(getColor("green"))
 	fmt.Println(lipgloss.PlaceHorizontal(width, lipgloss.Center, header.Italic(true).Render(str)))
-	headers := [7]string{"#", "Judul", "Durasi", "Genre", "Rating", "Jadwal Tayang", "Harga"}
+	headers := [8]string{"#", "Judul", "Durasi", "Genre", "Rating", "Jadwal Tayang", "Harga", "Discount"}
 
 	t := table.New().
 		Width(width).
@@ -62,10 +62,10 @@ func ListMovie(data db.MovieDB, str string) {
 				return style.Foreground(lipgloss.Color("252"))
 			}
 		}).
-		Headers(headers[0], headers[1], headers[2], headers[3], headers[4], headers[5], headers[6])
+		Headers(headers[0], headers[1], headers[2], headers[3], headers[4], headers[5], headers[6], headers[7])
 
 	for i := 0; i < data.Len; i++ {
-		t.Row(fmt.Sprintf("%d", i+1), data.Db[i].Title, fmt.Sprintf("%d Menit", data.Db[i].Duration), data.Db[i].Genre, fmt.Sprintf("%.1f", data.Db[i].Rating), fmt.Sprintf("%d:00 %d %s", data.Db[i].Schedule.Hour, data.Db[i].Schedule.Date, db.ConvertMonth(data.Db[i].Schedule.Month)), fmt.Sprintf("Rp. %d", data.Db[i].Price))
+		t.Row(fmt.Sprintf("%d", i+1), data.Db[i].Title, fmt.Sprintf("%d Menit", data.Db[i].Duration), data.Db[i].Genre, fmt.Sprintf("%.1f", data.Db[i].Rating), fmt.Sprintf("%d:00 %d %s", data.Db[i].Schedule.Hour, data.Db[i].Schedule.Date, db.ConvertMonth(data.Db[i].Schedule.Month)), fmt.Sprintf("Rp. %d", data.Db[i].Price), fmt.Sprintf("%d%%", data.Db[i].Discount))
 	}
 	fmt.Println(t)
 }
@@ -283,6 +283,7 @@ func ViewEdit(data db.MovieDB, idChosen, dataChosen bool, id, dataType int) {
 	clearScreen()
 	RenderTitle("Edit Data Film", 45, 0, 0)
 	style := getStyle()
+	highlight := style.Foreground(getColor("cyan"))
 	var chosen db.Movies
 	if id > -1 {
 		chosen = data.Db[id]
@@ -308,15 +309,16 @@ func ViewEdit(data db.MovieDB, idChosen, dataChosen bool, id, dataType int) {
 			RenderTip("\nPilih q untuk kembali")
 			fmt.Print("\nPilih data yang mau diubah : ")
 		} else {
+			last := data.Db[id]
 			switch dataType {
 			case 0:
-				fmt.Printf("Judul lama : %s\n", data.Db[id].Title)
+				fmt.Printf("Judul lama : %s\n", last.Title)
 				fmt.Print("\nJudul baru : ")
 			case 1:
-				fmt.Printf("Durasi lama : %d\n", data.Db[id].Duration)
+				fmt.Printf("Durasi lama : %d\n", last.Duration)
 				fmt.Print("\nDurasi baru : ")
 			case 2:
-				fmt.Printf("Genre lama : %s\n", data.Db[id].Genre)
+				fmt.Printf("Genre lama : %s\n", last.Genre)
 				fmt.Println(style.Render("\n1. Action"))
 				fmt.Println(style.Render("\n2. Comedy"))
 				fmt.Println(style.Render("\n3. Drama"))
@@ -330,21 +332,26 @@ func ViewEdit(data db.MovieDB, idChosen, dataChosen bool, id, dataType int) {
 				RenderTip("\npilih genre menggunakan angka")
 				fmt.Print("Genre baru : ")
 			case 3:
-				fmt.Printf("Rating lama : %.2f\n", data.Db[id].Rating)
+				fmt.Printf("Rating lama : %.2f\n", last.Rating)
 				fmt.Print("\nRating baru : ")
 			case 4:
-				fmt.Printf("Harga lama : %d\n", data.Db[id].Price)
+				fmt.Printf("Harga lama : %d\n", last.Price)
 				fmt.Print("\nHarga baru : ")
-			case 5, 6, 7:
-				fmt.Printf("Jadwal tayang lama : %d.00 %d %s\n", data.Db[id].Schedule.Hour, data.Db[id].Schedule.Date, db.ConvertMonth(data.Db[id].Schedule.Month))
+			case 5:
+				fmt.Printf("Jadwal tayang lama : %d.00 %d %s\n", last.Schedule.Hour, last.Schedule.Date, db.ConvertMonth(last.Schedule.Month))
 				fmt.Println("\nJadwal tayang baru :")
-				fmt.Println(style.Render("Bulan : "))
-				if dataType == 6 {
-					fmt.Println(style.Render("Tanggal : "))
-				}
-				if dataType == 7 {
-					fmt.Println(style.Render("Jam : "))
-				}
+				fmt.Print(style.Render("Bulan : "))
+			case 6:
+				fmt.Printf("Jadwal tayang lama : %d.00 %d %s\n", last.Schedule.Hour, last.Schedule.Date, db.ConvertMonth(last.Schedule.Month))
+				fmt.Println("\nJadwal tayang baru :")
+				fmt.Print(style.Render(fmt.Sprintf("Bulan : %s", highlight.Render(db.ConvertMonth(data.Db[id].Schedule.Month)))))
+				fmt.Print(style.Render("\nTanggal : "))
+			case 7:
+				fmt.Printf("Jadwal tayang lama : %d.00 %d %s\n", last.Schedule.Hour, last.Schedule.Date, db.ConvertMonth(last.Schedule.Month))
+				fmt.Println("\nJadwal tayang baru :")
+				fmt.Print(style.Render(fmt.Sprintf("Bulan : %s", highlight.Render(db.ConvertMonth(data.Db[id].Schedule.Month)))))
+				fmt.Print(style.Render(fmt.Sprintf("\nTanggal : %s", highlight.Render(fmt.Sprintf("%d", data.Db[id].Schedule.Date)))))
+				fmt.Print(style.Render("\nJam : "))
 			}
 		}
 	}
@@ -352,11 +359,12 @@ func ViewEdit(data db.MovieDB, idChosen, dataChosen bool, id, dataType int) {
 
 func ViewDelete(data db.MovieDB, id int, hasChosen bool) {
 	clearScreen()
+	fmt.Println(id)
 	var chosen db.Movies
 	if id > -1 {
 		chosen = data.Db[id]
 	} else {
-		chosen = db.Movies{Title: "", Duration: 0, Genre: "", Rating: 0, Price: 0, Schedule: db.MovieSchedule{Hour: 0, Date: 0, Month: 0}}
+		chosen = db.Movies{Title: "", Duration: 0, Genre: "", Rating: 0, Price: 0, Discount: 0, Schedule: db.MovieSchedule{Hour: 0, Date: 0, Month: 0}}
 	}
 	if hasChosen {
 		var dbChosen db.MovieDB
@@ -367,7 +375,7 @@ func ViewDelete(data db.MovieDB, id int, hasChosen bool) {
 		RenderTip("ENTER untuk konfirmasi, ESC untuk cancel")
 	} else {
 		ListMovie(data, "Database Film")
-		RenderTip("\nPilih q untuk kembali ke menu utama")
+		RenderTip("\nPilih 0 untuk kembali ke menu utama")
 		fmt.Print("\nPilih data film yang ingin dihapus : ")
 	}
 }
