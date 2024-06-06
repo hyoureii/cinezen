@@ -431,17 +431,17 @@ func buyTicket(dbMovie db.MovieDB, dbTicket *db.Tickets, seat *db.AvailSeat) {
 					inp--
 					if inp > -1 && inp < dbMovie.Len {
 						id = inp
+						chosen = dbMovie.Db[id]
 						idChosen = true
 					}
 				}
-				chosen = dbMovie.Db[id]
-				idChosen = true
 			} else {
 				key := app.DetectKey().Code
 				if key == keys.Esc {
 					idChosen = false
 				} else if key == keys.Enter {
 					dbTicket.Movies.Db[dbTicket.Movies.Len] = chosen
+					dbTicket.Movies.Db[dbTicket.Movies.Len].Price = dbTicket.Movies.Db[dbTicket.Movies.Len].Price - (dbTicket.Movies.Db[dbTicket.Movies.Len].Price*dbChosen.Db[0].Discount)/100
 					dbTicket.Movies.Len++
 					seatChosen := false
 					for !seatChosen {

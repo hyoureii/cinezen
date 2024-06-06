@@ -421,6 +421,7 @@ func BuyTicket(data db.MovieDB, id int, idChosen, success bool) {
 	var chosen db.Movies
 	if id > -1 {
 		chosen = data.Db[id]
+		chosen.Price = chosen.Price - ((chosen.Price * chosen.Discount) / 100)
 	} else {
 		chosen = db.Movies{Title: "", Duration: 0, Genre: "", Rating: 0, Price: 0, Discount: 0, Schedule: db.MovieSchedule{Hour: 0, Date: 0, Month: 0}}
 	}
@@ -428,7 +429,6 @@ func BuyTicket(data db.MovieDB, id int, idChosen, success bool) {
 	dbChosen.Db[0] = chosen
 	dbChosen.Len = 1
 	if success {
-		dbChosen.Db[0].Price = dbChosen.Db[0].Price * (dbChosen.Db[0].Discount / 100)
 		RenderTitle("Film Berhasil Dibeli!", 45, 0, 0)
 		ListMovie(dbChosen, "")
 		fmt.Println("\nApakah anda ingin membeli tiket lain?")
