@@ -127,10 +127,42 @@ func ViewAdmin(showList bool, data db.MovieDB) {
 	RenderTip("\nTekan q untuk log out")
 }
 
-func ViewUser(showList bool, data db.MovieDB) {
+func ListTicket(data db.Tickets, str string) {
+	width := 115
+	style := getStyle()
+	header := style.Bold(true).Foreground(getColor("green"))
+	fmt.Println(lipgloss.PlaceHorizontal(width, lipgloss.Center, header.Italic(true).Render(str)))
+	headers := [8]string{"#", "Judul", "Durasi", "Genre", "Rating", "Jadwal Tayang", "Harga", "Discount"}
+
+	t := table.New().
+		Width(width).
+		Border(lipgloss.NormalBorder()).
+		BorderStyle(lipgloss.NewStyle().Foreground(getColor("teal"))).
+		StyleFunc(func(row, col int) lipgloss.Style {
+			switch {
+			case row == 0:
+				return header
+			case row%2 == 0:
+				return style
+			default:
+				return style.Foreground(lipgloss.Color("252"))
+			}
+		}).
+		Headers(headers[0], headers[1], headers[2], headers[3], headers[4], headers[5], headers[6], headers[7])
+
+	for i := 0; i < data.Movies.Len; i++ {
+		t.Row(fmt.Sprintf("%d", i+1), data.Movies.Db[i].Title, fmt.Sprintf("%d Menit", data.Movies.Db[i].Duration), data.Movies.Db[i].Genre, fmt.Sprintf("%.1f", data.Movies.Db[i].Rating), fmt.Sprintf("%d:00 %d %s", data.Movies.Db[i].Schedule.Hour, data.Movies.Db[i].Schedule.Date, db.ConvertMonth(data.Movies.Db[i].Schedule.Month)), fmt.Sprintf("Rp. %d", data.Movies.Db[i].Price), fmt.Sprintf("%d%%", data.Movies.Db[i].Discount))
+	}
+	fmt.Println(t)
+}
+
+func ViewUser(showList, showTickets bool, ticket db.Tickets, data db.MovieDB) {
 	style := getStyle()
 	clearScreen()
 	RenderTitle("CINEZEN", 50, 1, 1)
+	if showTickets {
+		ListTicket(ticket, "Tiket yang dimiliki")
+	}
 	if showList {
 		fmt.Print("\n")
 		ListMovie(data, "Daftar Film")
@@ -139,6 +171,11 @@ func ViewUser(showList bool, data db.MovieDB) {
 		fmt.Println(style.Render("\n1. Tampilkan Daftar Film"))
 	}
 	fmt.Println(style.Render("2. Cari film\n3. Pesan tiket"))
+	if showTickets {
+		fmt.Println(style.Render("\n4. Sembunyikan Daftar Ticket"))
+	} else {
+		fmt.Println(style.Render("\n4. Tampilkan Daftar Film"))
+	}
 	if showList {
 		fmt.Println(style.Render("\n7. Urutkan Berdasarkan Genre\n8. Urutkan Berdasarkan Jadwal Tayang\n9. Urutkan Berdasarkan Harga"))
 	}
@@ -359,7 +396,6 @@ func ViewEdit(data db.MovieDB, idChosen, dataChosen bool, id, dataType int) {
 
 func ViewDelete(data db.MovieDB, id int, hasChosen bool) {
 	clearScreen()
-	fmt.Println(id)
 	var chosen db.Movies
 	if id > -1 {
 		chosen = data.Db[id]
@@ -380,23 +416,30 @@ func ViewDelete(data db.MovieDB, id int, hasChosen bool) {
 	}
 }
 
-func BuyTicket(chosen db.MovieDB, idChosen, success, multi bool) {
+func BuyTicket(data db.MovieDB, id int, idChosen, success bool) {
 	clearScreen()
+	var chosen db.Movies
+	if id > -1 {
+		chosen = data.Db[id]
+	} else {
+		chosen = db.Movies{Title: "", Duration: 0, Genre: "", Rating: 0, Price: 0, Discount: 0, Schedule: db.MovieSchedule{Hour: 0, Date: 0, Month: 0}}
+	}
+	var dbChosen db.MovieDB
+	dbChosen.Db[0] = chosen
+	dbChosen.Len = 1
 	if success {
+		dbChosen.Db[0].Price = dbChosen.Db[0].Price * (dbChosen.Db[0].Discount / 100)
 		RenderTitle("Film Berhasil Dibeli!", 45, 0, 0)
-		ListMovie(chosen, "")
+		ListMovie(dbChosen, "")
 		fmt.Println("\nApakah anda ingin membeli tiket lain?")
 		RenderTip("ENTER untuk konfirmasi, ESC untuk cancel")
 	} else {
 		if !idChosen {
-			if multi {
-				ListMovie(chosen, "")
-				RenderTip("\nPilih q untuk kembali ke menu utama")
-				RenderTip("\nPilih menggunakan angka")
-				fmt.Println("Ditemukan lebih dari satu film,\nsilahkan pilih film yang ingin dibeli")
-			}
+			ListMovie(data, "")
+			RenderTip("\nPilih 0 untuk kembali ke menu utama")
+			fmt.Print("Pilih film yang ingin dibeli : ")
 		} else {
-			ListMovie(chosen, "")
+			ListMovie(dbChosen, "")
 			fmt.Println("\nApakah anda ingin membeli tiket untuk film ini?")
 			RenderTip("ENTER untuk konfirmasi, ESC untuk cancel")
 		}

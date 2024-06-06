@@ -32,8 +32,7 @@ type MovieDB struct {
 type AvailSeat [9][9]bool
 
 type Tickets struct {
-	Movies [MAX_MOV]Movies
-	Len    int
+	Movies MovieDB
 	Seat   string
 }
 

@@ -64,9 +64,10 @@ func adminStart(logged *bool, showList bool, dbMovie *db.MovieDB) {
 }
 
 func userStart(logged *bool, showList bool, dbMovie db.MovieDB, seat db.AvailSeat) {
+	showTicket := false
 	var dbTicket db.Tickets
 	for *logged {
-		views.ViewUser(showList, dbMovie)
+		views.ViewUser(showList, showTicket, dbTicket, dbMovie)
 		switch app.DetectKey().String()[0] {
 		case '1':
 			if showList {
@@ -79,7 +80,11 @@ func userStart(logged *bool, showList bool, dbMovie db.MovieDB, seat db.AvailSea
 		case '3':
 			buyTicket(dbMovie, &dbTicket, &seat)
 		case '4':
-
+			if showTicket {
+				showTicket = false
+			} else {
+				showTicket = true
+			}
 		case '7':
 			db.Sort(0, &dbMovie)
 		case '8':
@@ -399,12 +404,13 @@ func delete(dbMovie *db.MovieDB) {
 
 func buyTicket(dbMovie db.MovieDB, dbTicket *db.Tickets, seat *db.AvailSeat) {
 	var chosen db.Movies
-	done, idChosen, success, multi := false, false, false, false
+	id := -1
+	done, idChosen, success := false, false, false
 	for !done {
 		var dbChosen db.MovieDB
 		dbChosen.Db[0] = chosen
 		dbChosen.Len = 1
-		views.BuyTicket(dbChosen, idChosen, success, multi)
+		views.BuyTicket(dbMovie, id, idChosen, success)
 		if success {
 			key := app.DetectKey().Code
 			if key == keys.Esc {
@@ -412,33 +418,31 @@ func buyTicket(dbMovie db.MovieDB, dbTicket *db.Tickets, seat *db.AvailSeat) {
 			} else if key == keys.Enter {
 				chosen = db.Movies{Title: "", Duration: 0, Genre: "", Rating: 0, Price: 0, Discount: 0, Schedule: db.MovieSchedule{Hour: 0, Date: 0, Month: 0}}
 				success = false
-				multi = false
 				idChosen = false
 			}
 		} else {
 			if !idChosen {
-				dbFound := search(dbMovie)
-				views.BuyTicket(dbFound, idChosen, success, multi)
-				if dbFound.Len > 1 {
-					multi = true
-					var inp string
-					fmt.Scan(&inp)
-					if inp[0] == 'q' {
-						done = true
-					} else if int(inp[0]-49) > -1 && int(inp[0]-49) < dbFound.Len {
-						chosen = dbFound.Db[int(inp[0]-49)]
-					}
+				views.BuyTicket(dbMovie, id, idChosen, success)
+				var inp int
+				fmt.Scan(&inp)
+				if inp == 0 {
+					done = true
 				} else {
-					chosen = dbFound.Db[0]
+					inp--
+					if inp > -1 && inp < dbMovie.Len {
+						id = inp
+						idChosen = true
+					}
 				}
+				chosen = dbMovie.Db[id]
 				idChosen = true
 			} else {
 				key := app.DetectKey().Code
 				if key == keys.Esc {
 					idChosen = false
 				} else if key == keys.Enter {
-					dbTicket.Movies[dbTicket.Len] = chosen
-					dbTicket.Len++
+					dbTicket.Movies.Db[dbTicket.Movies.Len] = chosen
+					dbTicket.Movies.Len++
 					seatChosen := false
 					for !seatChosen {
 						views.SeatSelect(*seat)
